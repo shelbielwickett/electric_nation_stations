@@ -30,8 +30,8 @@ def generate_ev_station_data(state_names):
     gdf = gpd.GeoDataFrame(df, geometry='geometry', crs='EPSG:4326')
 
     # Load shapefiles (adjust to relative path or absolute path)
-    states = gpd.read_file('/workspaces/electric_nation_stations/data/cb_2018_us_state_500k.shp').to_crs('EPSG:4326')
-    tribal = gpd.read_file('/workspaces/electric_nation_stations/data/tl_2024_us_aiannh.shp').to_crs('EPSG:4326')
+    states = gpd.read_file('data/cb_2018_us_state_500k.shp').to_crs('EPSG:4326')
+    tribal = gpd.read_file('data/tl_2024_us_aiannh.shp').to_crs('EPSG:4326')
     tribal = tribal[tribal['AIANNHCE'].notna()].rename(columns={'NAME': 'Tribal Nation'})
 
     # Filter by state
