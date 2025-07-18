@@ -8,6 +8,7 @@ click==8.2.1
 click-plugins==1.1.1.2
 cligj==0.7.2
 fiona==1.10.1
+folium==0.20.0
 geopandas==1.1.1
 gitdb==4.0.12
 GitPython==3.1.41
@@ -36,6 +37,7 @@ shapely==2.1.1
 six==1.17.0
 smmap==5.0.2
 streamlit==1.47.0
+streamlit_folium==0.25.0
 tenacity==9.1.2
 toml==0.10.2
 tornado==6.5.1
