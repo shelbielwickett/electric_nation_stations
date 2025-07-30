@@ -54,7 +54,23 @@ def generate_nearby_ev_stations(lat, lon, radius):
 # --- Streamlit Interface ---
 st.set_page_config(page_title="Nearby EV Charging Stations", layout="wide")
 
-st.title("Nearby EV Charging Stations")
+# Load base64 logo (once)
+with open("images/logo_base64.txt") as f:
+    logo_base64 = f.read()
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.title("Nearby EV Charging Stations")
+with col2:
+    st.markdown(
+        f"""
+        <div style="text-align: right; padding-top: 0.5rem;">
+            <img src="data:image/png;base64,{logo_base64}" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+st.markdown("*All EV station data is from the Alternative Fuels Data Center https://afdc.energy.gov/*")
 st.markdown("Enter coordinates and search radius to locate stations.")
 
 lat_input = st.text_input("Latitude", "47.1198")

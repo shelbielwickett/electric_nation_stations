@@ -9,7 +9,21 @@ from shapely.geometry import Point
 
 st.set_page_config(page_title="EV Stations on Tribal Lands", layout="wide")
 
-st.title("EV Stations on Tribal Lands")
+# Load base64 logo (once)
+with open("images/logo_base64.txt") as f:
+    logo_base64 = f.read()
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.title("EV Stations on Tribal Lands")
+with col2:
+    st.markdown(
+        f"""
+        <div style="text-align: right; padding-top: 0.5rem;">
+            <img src="data:image/png;base64,{logo_base64}" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 st.markdown("Enter U.S. state abbreviations (e.g., MI, WI, SD) to filter EV stations on tribal land.")
 
 def generate_ev_station_data(state_names):
