@@ -8,6 +8,43 @@ from math import radians, cos, sin, asin, sqrt
 import folium
 from streamlit_folium import st_folium
 
+def enrich_connector_definitions(df, df2):
+    # Ensure df2 key is string (no trailing spaces)
+    df2['EV Connector Types'] = df2['EV Connector Types'].str.strip()
+
+    # Create a mapping dictionary for fast lookup
+    connector_map = df2.set_index("EV Connector Types").to_dict(orient="index")
+
+    # Define a function to process one row
+    def map_connectors(cell):
+        if pd.isna(cell):
+            return pd.Series([None, None, None])
+        types = [c.strip() for c in cell.split(' ')]
+        descriptions = []
+        capacities = []
+        sources = []
+        for c in types:
+            if c in connector_map:
+                info = connector_map[c]
+                descriptions.append(info["Connector Type Description"])
+                capacities.append(str(info["Maximum Charge Capacity"]))
+                sources.append(info["Capacity Information Source"])
+            else:
+                descriptions.append("N/A")
+                capacities.append("N/A")
+                sources.append("N/A")
+        return pd.Series([
+            "; ".join(descriptions),
+            "; ".join(capacities),
+            "; ".join(sources)
+        ])
+
+    # Apply row-wise
+    df[["Connector Type Description", "Maximum Charge Capacity", "Capacity Information Source"]] = df["EV Connector Types"].apply(map_connectors)
+
+    return df
+
+
 def generate_nearby_ev_stations(lat, lon, radius):
     # API request to CSV endpoint
     url = "https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.csv"
@@ -49,7 +86,22 @@ def generate_nearby_ev_stations(lat, lon, radius):
         'EV Level2 EVSE Num',
         'EV Level1 EVSE Num'
     ]
-    return df[cols] if not df.empty else pd.DataFrame(columns=cols)
+    # read connector capacity csv
+    df2 = pd.read_csv('data/EV Connectors vs Charge Capacities.csv', low_memory=False)
+
+    # Call enrichment function
+    df = enrich_connector_definitions(df, df2)
+
+    # Add the columns from df2
+    extra_cols = [
+        'Connector Type Description',
+        'Maximum Charge Capacity',
+        'Capacity Information Source'
+    ]
+    all_cols = cols + extra_cols
+
+    return df[all_cols] if not df.empty else pd.DataFrame(columns=all_cols)
+
 
 # --- Streamlit Interface ---
 st.set_page_config(page_title="Nearby EV Charging Stations", layout="wide")

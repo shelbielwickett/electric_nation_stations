@@ -1,0 +1,9 @@
+﻿EV Connector Types,Connector Type Description,Maximum Charge Capacity,Capacity Information Source
+NEMA1450,NEMA 14-50 (J1772 AC),9.6 kW (240 V),https://ev-lectron.com/blogs/blog/nema-14-50-tesla-charge-rate-1?srsltid=AfmBOop5YC3b-4b-5-d956I1NffnBYPGwoGHVVsgTBQmIHRP80ssSC9-
+NEMA515,NEMA 5-15 (J1772 AC),1.44 kW (120 V),https://en.wikipedia.org/wiki/SAE_J1772
+NEMA520,NEMA 5-20 (J1772 AC),2.4 kW (120 V) Not sure!,"https://ascentoptics.com/blog/nema-5-20p/#:~:text=To%20meet%20safety%20and%20functionality,and%20strong%20flow%20of%20power."
+J1772,J1772 (AC),1.92 kW (120 V) 19.2 kW (208/240 V),https://www.power-sonic.com/blog/ev-charging-connector-types/
+TESLA,NACS (J3400 AC/DC),250 kW,https://www.power-sonic.com/blog/ev-charging-connector-types/
+J1772COMBO,CCS (DC),360 kW,https://www.power-sonic.com/blog/ev-charging-connector-types/
+CHADEMO,CHADEMO (DC),400 kW,https://www.power-sonic.com/blog/ev-charging-connector-types/
+J3271,MCS (J3271 DC),3.75 MW,https://yocharge.com/faq/what-is-megawatt-charging-system-mcs/
