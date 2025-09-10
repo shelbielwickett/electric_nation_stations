@@ -1,9 +1,28 @@
+import os
 import streamlit as st
 import requests
 import pandas as pd
 from io import StringIO
 import folium
 from streamlit_folium import st_folium
+
+# --- Helper: get API key from secrets → env → sidebar (required) ---
+def get_nrel_api_key() -> str | None:
+    # 1) st.secrets; 2) env var; 3) sidebar prompt
+    try:
+        return st.secrets["NREL_API_KEY"]
+    except Exception:
+        pass
+    k = os.getenv("NREL_API_KEY")
+    if k:
+        return k
+    with st.sidebar:
+        return st.text_input(
+            "Enter your NREL API key",
+            type="password",
+            help="Get a free key at https://developer.nrel.gov",
+            key="nrel_api_key_input",
+        ) or None
 
 # --- Helper Functions ---
 def enrich_connector_definitions(df, df2):
@@ -13,14 +32,14 @@ def enrich_connector_definitions(df, df2):
     def map_connectors(cell):
         if pd.isna(cell):
             return pd.Series([None, None, None])
-        types = [c.strip() for c in cell.split(' ')]
+        types = [c.strip() for c in str(cell).split(' ')]
         descriptions, capacities, sources = [], [], []
         for c in types:
             if c in connector_map:
                 info = connector_map[c]
-                descriptions.append(info["Connector Type Description"])
-                capacities.append(str(info["Maximum Charge Capacity"]))
-                sources.append(info["Capacity Information Source"])
+                descriptions.append(info.get("Connector Type Description", "N/A"))
+                capacities.append(str(info.get("Maximum Charge Capacity", "N/A")))
+                sources.append(info.get("Capacity Information Source", "N/A"))
             else:
                 descriptions.append("N/A")
                 capacities.append("N/A")
@@ -34,17 +53,17 @@ def enrich_connector_definitions(df, df2):
     df[["Connector Type Description", "Maximum Charge Capacity", "Capacity Information Source"]] = df["EV Connector Types"].apply(map_connectors)
     return df
 
-def generate_nearby_ev_stations(lat, lon, radius):
+def generate_nearby_ev_stations(lat, lon, radius, api_key: str):
     url = "https://developer.nrel.gov/api/alt-fuel-stations/v1/nearest.csv"
     params = {
-        "api_key": 'MMnlHTRA1FIWpFCH5JJAlLUFK16QmhzGiPQICAem',
+        "api_key": api_key,
         "fuel_type": "ELEC",
         "latitude": lat,
         "longitude": lon,
         "status": 'E',
         "radius": radius
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=30)
     response.raise_for_status()
 
     df = pd.read_csv(StringIO(response.text), low_memory=False)
@@ -102,7 +121,7 @@ def geocode_suggestions(query: str, limit: int = 8):
         ]
     except Exception:
         return []
-    
+
 # --- Streamlit App ---
 st.set_page_config(page_title="Nearby EV Charging Stations", layout="wide")
 
@@ -123,7 +142,13 @@ with col2:
 
 st.markdown("*All EV station data is from the Alternative Fuels Data Center https://afdc.energy.gov/*")
 
-# Choose  which type of input
+# Require API key before proceeding
+api_key = get_nrel_api_key()
+if not api_key:
+    st.warning("Please enter your NREL API key in the sidebar to use this app.\n You can register for an NREL API key [here](https://developer.nrel.gov/signup/).")
+    st.stop()
+
+# Choose which type of input
 mode = st.radio("Choose input method", ["Address search", "Latitude/Longitude"], horizontal=True)
 
 # Resolve a lat/lon based on mode
@@ -178,7 +203,7 @@ if st.session_state.get("run_query"):
                 st.error("Please provide a valid address (and select a result) or valid latitude/longitude.")
             else:
                 radius = float(radius_input)
-                df = generate_nearby_ev_stations(resolved_lat, resolved_lon, radius)
+                df = generate_nearby_ev_stations(resolved_lat, resolved_lon, radius, api_key=api_key)
 
                 if not df.empty:
                     st.success(f"Found {len(df)} EV stations within {radius} miles.")
