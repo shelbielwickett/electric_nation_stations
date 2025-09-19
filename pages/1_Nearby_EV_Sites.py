@@ -5,6 +5,7 @@ import pandas as pd
 from io import StringIO
 import folium
 from streamlit_folium import st_folium
+import base64
 
 # --- Helper: get API key from secrets → env → sidebar (required) ---
 def get_nrel_api_key() -> str | None:
@@ -140,7 +141,18 @@ with col2:
         unsafe_allow_html=True
     )
 
-st.markdown("*All EV station data is from the Alternative Fuels Data Center https://afdc.energy.gov/*")
+df1 = pd.read_csv("data/EV Connectors vs Charge Capacities.csv")
+csv_bytes = df1.to_csv(index=False).encode("utf-8")
+b64 = base64.b64encode(csv_bytes).decode()
+href = f'data:text/csv;base64,{b64}'
+
+st.write(
+    "*All EV station data is from the Alternative Fuels Data Center (https://afdc.energy.gov/) except "
+    "the <u>Maximum Charge Capacity</u> which is based on a variety of web sources found "
+    f'<a href="{href}" download="connector_capacity_sources.csv">here</a>.*',
+    unsafe_allow_html=True
+
+)
 
 # Require API key before proceeding
 api_key = get_nrel_api_key()
@@ -195,6 +207,7 @@ radius_input = st.text_input("Search Radius (miles)", "10")
 if st.button("Generate"):
     st.session_state.run_query = True
 
+
 # --- Query + Map ---
 if st.session_state.get("run_query"):
     with st.spinner("Querying and filtering stations..."):
@@ -213,6 +226,7 @@ if st.session_state.get("run_query"):
                         file_name=f"ev_stations_within_{radius}_miles_of_query.csv"
                     )
                     st.dataframe(df, use_container_width=True)
+
 
                     # --- Map ---
                     m = folium.Map(location=[resolved_lat, resolved_lon], zoom_start=11)
