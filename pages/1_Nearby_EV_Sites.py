@@ -146,12 +146,23 @@ csv_bytes = df1.to_csv(index=False).encode("utf-8")
 b64 = base64.b64encode(csv_bytes).decode()
 href = f'data:text/csv;base64,{b64}'
 
-st.write(
-    "*All EV station data is from the Alternative Fuels Data Center (https://afdc.energy.gov/) except "
-    "the <u>Maximum Charge Capacity</u> which is based on a variety of web sources found "
+# st.write(
+#     "*All EV station data is from the Alternative Fuels Data Center (https://afdc.energy.gov/) except "
+#     "the <u>Maximum Charge Capacity</u> \n which is based on the maximum power output of the connector type. "
+#     "Sources for connector maximum power output can be found "
+#     f'<a href="{href}" download="connector_capacity_sources.csv">here</a>.*',
+#     unsafe_allow_html=True
+
+# )
+
+st.markdown(
+    '*All EV station data is from the Alternative Fuels Data Center (https://afdc.energy.gov/) except '
+    'the <u>Maximum Charge Capacity</u>  \n'  # 👈 two spaces before \n
+    'which is based on the maximum power output of the connector type. '
+    'Sources for connector maximum power output can  \n'
+    'be found '
     f'<a href="{href}" download="connector_capacity_sources.csv">here</a>.*',
     unsafe_allow_html=True
-
 )
 
 # Require API key before proceeding
